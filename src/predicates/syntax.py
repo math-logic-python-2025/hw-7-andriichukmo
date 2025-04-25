@@ -123,6 +123,10 @@ class Term:
         Returns:
             The standard string representation of the current term.
         """
+        root = self.root
+        if is_constant(root) or is_variable(root):
+            return root
+        return f"{root}({','.join(map(str, self.arguments))})"
         # Task 7.1
 
     def __eq__(self, other: object) -> bool:
@@ -152,6 +156,22 @@ class Term:
     def __hash__(self) -> int:
         return hash(str(self))
 
+    def sep_bracket(s1 : str) -> Tuple:
+        open = s1[0]
+        if open == '(':
+            close = ')'
+        else:
+            close = ']'
+        cnt = 0
+        for i, j in enumerate(s1):
+            if j == open:
+                cnt += 1
+            elif j == close:
+                cnt -= 1
+            if cnt == 0:
+                return s1[i+1:], s1[:i+1]
+        
+
     @staticmethod
     def _parse_prefix(string: str) -> Tuple[Term, str]:
         """Parses a prefix of the given string into a term.
@@ -167,6 +187,7 @@ class Term:
             that entire name (and not just a part of it, such as ``'x1'``).
         """
         # Task 7.3a
+                            
 
     @staticmethod
     def parse(string: str) -> Term:
@@ -407,6 +428,18 @@ class Formula:
         Returns:
             The standard string representation of the current formula.
         """
+        root = self.root
+        if is_equality(root):
+            return f"{self.arguments[0]}={self.arguments[1]}"
+        if is_relation(root):
+            return f"{root}({','.join(map(str, self.arguments))})"
+        if is_unary(root):
+            return f"{root}{self.first.__repr__()}"
+        if is_binary(root):
+            return f"({self.first.__repr__()}{root}{self.second.__repr__()})"
+        if is_quantifier(root):
+            return f"{root}{self.variable}[{self.statement.__repr__()}]"
+        raise ValueError(f"Invalid formula root: {root}")
         # Task 7.2
 
     def __eq__(self, other: object) -> bool:
